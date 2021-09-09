@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DemoApi.Services.Auth;
 using DemoApi.Settings;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -24,26 +26,28 @@ namespace DemoApi.Services
 
         public async Task<AuthenticationResult> RegisterAsync(string username, string password)
         {
-            var existingUser = await _userManager.FindByNameAsync(username);
-            if (existingUser != null) return new AuthenticationResult { Errors = new[] { "Username is taken" } };
+            var user = await _userManager.FindByNameAsync(username);
+            if (user != null) return new AuthenticationResult { Errors = new[] { "Username is taken" } };
 
-            var newUser = new IdentityUser { UserName = username };
+            IdentityUser newUser = new() { UserName = username };
 
             var createdUser = await _userManager.CreateAsync(newUser, password);
 
-            if (!createdUser.Succeeded)
-                return new AuthenticationResult { Errors = createdUser.Errors.Select(x => x.Description) };
+            return createdUser.Succeeded ? JwtAuth(newUser) : new AuthenticationResult { Errors = createdUser.Errors.Select(x => x.Description) };
+        }
 
+        private AuthenticationResult JwtAuth(IdentityUser user)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, newUser.UserName),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.UniqueName, newUser.UserName),
-                    new Claim("id", newUser.Id)
+                    new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                    new Claim("id", user.Id)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
@@ -57,6 +61,16 @@ namespace DemoApi.Services
                 Success = true,
                 Token = tokenHandler.WriteToken(token)
             };
+        }
+
+        public async Task<AuthenticationResult> LoginAsync(string username, string password)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            if (user is null) return new AuthenticationResult { Errors = new[] { "User does not exist" } };
+
+            bool validPassword = await _userManager.CheckPasswordAsync(user, password);
+
+            return validPassword ? JwtAuth(user) : new AuthenticationResult { Errors = new[] { "Incorrect username & password" } };
         }
     }
 }

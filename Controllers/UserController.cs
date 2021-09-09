@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using DemoApi.Routing.v1.DataTransferObjects;
 using DemoApi.Services;
 using DemoApi.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
@@ -16,19 +17,22 @@ namespace DemoApi.Controllers
             _identityService = identityService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationRequest request)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] UserDto request)
         {
             var response = await _identityService.RegisterAsync(request.Username, request.Password);
             if (!response.Success)
                 return BadRequest(new RegistrationResponse() { Errors = response.Errors });
             return Ok(new RegistrationResponse() { Token = response.Token });
         }
-    }
 
-    public class UserRegistrationRequest
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserDto request)
+        {
+            var response = await _identityService.LoginAsync(request.Username, request.Password);
+            if (!response.Success)
+                return BadRequest(new RegistrationResponse() { Errors = response.Errors });
+            return Ok(new RegistrationResponse() { Token = response.Token });
+        }
     }
 }

@@ -35,4 +35,8 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.9" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Routing\v1\Responses\" />
+	</ItemGroup>
 </Project>

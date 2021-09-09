@@ -27,7 +27,7 @@ namespace DemoApi.Controllers
             return Ok(response.PostList);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
             var response = await _postService.GetByIdAsync(id);
@@ -54,7 +54,7 @@ namespace DemoApi.Controllers
             return Ok(response.Post);
         }
 
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("delete/{id:int}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var response = await _postService.DeleteAsync(id);
