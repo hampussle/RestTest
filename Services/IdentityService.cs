@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using DemoApi.Services.Auth;
 using DemoApi.Settings;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -33,7 +31,21 @@ namespace DemoApi.Services
 
             var createdUser = await _userManager.CreateAsync(newUser, password);
 
-            return createdUser.Succeeded ? JwtAuth(newUser) : new AuthenticationResult { Errors = createdUser.Errors.Select(x => x.Description) };
+            return createdUser.Succeeded
+                ? JwtAuth(newUser)
+                : new AuthenticationResult { Errors = createdUser.Errors.Select(x => x.Description) };
+        }
+
+        public async Task<AuthenticationResult> LoginAsync(string username, string password)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            if (user is null) return new AuthenticationResult { Errors = new[] { "User does not exist" } };
+
+            var validPassword = await _userManager.CheckPasswordAsync(user, password);
+
+            return validPassword
+                ? JwtAuth(user)
+                : new AuthenticationResult { Errors = new[] { "Incorrect username & password" } };
         }
 
         private AuthenticationResult JwtAuth(IdentityUser user)
@@ -61,16 +73,6 @@ namespace DemoApi.Services
                 Success = true,
                 Token = tokenHandler.WriteToken(token)
             };
-        }
-
-        public async Task<AuthenticationResult> LoginAsync(string username, string password)
-        {
-            var user = await _userManager.FindByNameAsync(username);
-            if (user is null) return new AuthenticationResult { Errors = new[] { "User does not exist" } };
-
-            bool validPassword = await _userManager.CheckPasswordAsync(user, password);
-
-            return validPassword ? JwtAuth(user) : new AuthenticationResult { Errors = new[] { "Incorrect username & password" } };
         }
     }
 }

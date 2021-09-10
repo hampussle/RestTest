@@ -10,6 +10,7 @@ namespace DemoApi.Data
             : base(options)
         {
         }
+
         public DbSet<Post> Post { get; set; }
     }
 }

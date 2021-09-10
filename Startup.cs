@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using DemoApi.Data;
 using DemoApi.Data.Repositories;
@@ -85,7 +86,7 @@ namespace DemoApi
                                 Id = "Bearer"
                             }
                         },
-                        System.Array.Empty<string>()
+                        Array.Empty<string>()
                     }
                 });
             });

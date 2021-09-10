@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DemoApi.Data.Repositories;
 using DemoApi.Models;
 
@@ -13,59 +14,66 @@ namespace DemoApi.Services
             Repo = repo;
         }
 
-        public async Task<PostResponse> DeleteAsync(int id)
+        public async Task<PostResponse> DeleteAsync(Guid id)
         {
             var post = await Repo.GetByIdAsync(id);
             if (post is null)
                 return new PostResponse($"Post with id: {id} wasn't found");
             Repo.Delete(post);
             var result = await Repo.SaveAsync();
-            if (result == 0)
-                return new PostResponse("No changes were made");
-            return new PostResponse(post: post);
+            return result == 0
+                ? new PostResponse("No changes were made")
+                : new PostResponse(post: post);
         }
 
-        public async Task<PostResponse> UpdateAsync(int id, string content)
+        public async Task<PostResponse> UpdateAsync(Guid id, string content)
         {
-            var post = await Repo.FirstOrDefaultAsync(x => x.Id == id);
+            var post = await Repo.GetByIdAsync(id);
             if (post is null)
                 return new PostResponse($"Post with id {id} wasn't found");
             var beforeUpdate = post.Content;
             post.Content = content;
             Repo.Update(post);
             var result = await Repo.SaveAsync();
-            if (result == 0)
-                return new PostResponse("No changes were made");
-            return new PostResponse($"{beforeUpdate} was changed to: {post.Content}");
+            return result == 0
+                ? new PostResponse("No changes were made")
+                : new PostResponse($"{beforeUpdate} was changed to: {post.Content}");
         }
 
-        public async Task<PostResponse> GetByIdAsync(int id)
+        public async Task<PostResponse> GetByIdAsync(Guid id)
         {
             var post = await Repo.GetByIdAsync(id);
-            if (post is null)
-                return new PostResponse($"Post with id: {id} wasn't found");
-            return new PostResponse(post: post);
+            return post is null
+                ? new PostResponse($"Post with id: {id} wasn't found")
+                : new PostResponse(post: post);
         }
 
-        public async Task<PostResponse> AddAsync(string content)
+        public async Task<PostResponse> AddAsync(string userid, string content)
         {
             Post post = new()
             {
-                Content = content
+                Content = content,
+                UserId = userid
             };
             await Repo.AddAsync(post);
             var result = await Repo.SaveAsync();
-            if (result == 0)
-                return new PostResponse("No changes were made");
-            return new PostResponse(post: post);
+            return result == 0
+                ? new PostResponse("No changes were made")
+                : new PostResponse(post: post);
         }
 
         public async Task<PostResponse> GetAllAsync()
         {
             var postList = await Repo.GetAllAsync();
-            if (postList.Count == 0)
-                return new PostResponse("No content was found");
-            return new PostResponse(postList: postList);
+            return postList.Count == 0
+                ? new PostResponse("No content was found")
+                : new PostResponse(postList: postList);
+        }
+
+        public async Task<bool> CorrectUserForPost(Guid id, string userId)
+        {
+            Post post = await Repo.GetByIdAsync(id);
+            return post is not null && post.UserId == userId;
         }
     }
 }

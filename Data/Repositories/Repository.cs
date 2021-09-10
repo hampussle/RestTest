@@ -44,7 +44,7 @@ namespace DemoApi.Data.Repositories
             return await Table.ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(Guid id)
         {
             return await Table.FindAsync(id);
         }

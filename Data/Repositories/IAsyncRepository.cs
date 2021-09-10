@@ -9,7 +9,7 @@ namespace DemoApi.Data.Repositories
     {
         Task<List<T>> GetAllAsync();
 
-        Task<T> GetByIdAsync(int id);
+        Task<T> GetByIdAsync(Guid id);
 
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
 

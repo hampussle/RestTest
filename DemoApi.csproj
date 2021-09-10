@@ -37,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Routing\v1\Responses\" />
+		<Folder Include="Data\Migrations\" />
+		<Folder Include="Routing\v1\Responses\" />
 	</ItemGroup>
 </Project>
