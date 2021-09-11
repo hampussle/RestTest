@@ -61,7 +61,7 @@ namespace DemoApi.Services
                     new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                     new Claim("id", user.Id)
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.Add(_jwtSettings.TokenLifetime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature)
             };

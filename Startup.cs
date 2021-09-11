@@ -19,7 +19,7 @@ namespace DemoApi
 {
     public class Startup
     {
-        private readonly string _origins = "AllowedOrigins";
+        private const string Origins = "AllowedOrigins";
 
         public Startup(IConfiguration configuration)
         {
@@ -43,7 +43,20 @@ namespace DemoApi
 
             JwtSettings jwt = new();
             Configuration.Bind("JWT", jwt);
-            services.AddSingleton(jwt);
+
+            var tokenValidation = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwt.Secret)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                RequireExpirationTime = false,
+                ValidateLifetime = true
+            };
+
+            services.AddSingleton(jwt)
+                .AddSingleton(tokenValidation);
+
             services.AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -53,16 +66,9 @@ namespace DemoApi
                 .AddJwtBearer(x =>
                 {
                     x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwt.Secret)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        RequireExpirationTime = false,
-                        ValidateLifetime = true
-                    };
+                    x.TokenValidationParameters = tokenValidation;
                 });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TodoAPI", Version = "v1" });
@@ -90,7 +96,7 @@ namespace DemoApi
                     }
                 });
             });
-            services.AddCors(options => options.AddPolicy(_origins, builder => builder.AllowAnyOrigin()));
+            services.AddCors(options => options.AddPolicy(Origins, builder => builder.AllowAnyOrigin()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,17 +104,17 @@ namespace DemoApi
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TodoAPI v1"));
+                app.UseDeveloperExceptionPage()
+                    .UseSwagger()
+                    .UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TodoAPI v1"));
             }
 
-            app.UseHttpsRedirection();
-            app.UseCors(_origins);
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseHttpsRedirection()
+                .UseCors(Origins)
+                .UseRouting()
+                .UseAuthentication()
+                .UseAuthorization()
+                .UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }
