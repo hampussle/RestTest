@@ -34,7 +34,7 @@ namespace DemoApi.Data.Repositories
             Table.Remove(obj);
         }
 
-        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
             return await Table.FirstOrDefaultAsync(predicate);
         }

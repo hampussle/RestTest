@@ -31,7 +31,7 @@ namespace DemoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var conn = Configuration.GetConnectionString("SqlConnectionString");
+            string conn = Configuration.GetConnectionString("SqlConnectionString");
             services.AddDbContext<DataContext>(options => options.UseSqlServer(conn))
                 .AddScoped(typeof(IAsyncRepository<>), typeof(Repository<>))
                 .AddScoped(typeof(IPostService), typeof(PostService))
@@ -44,7 +44,7 @@ namespace DemoApi
             JwtSettings jwt = new();
             Configuration.Bind("JWT", jwt);
 
-            var tokenValidation = new TokenValidationParameters
+            TokenValidationParameters tokenValidation = new()
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwt.Secret)),
@@ -103,11 +103,9 @@ namespace DemoApi
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage()
                     .UseSwagger()
                     .UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TodoAPI v1"));
-            }
 
             app.UseHttpsRedirection()
                 .UseCors(Origins)

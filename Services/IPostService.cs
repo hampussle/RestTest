@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DemoApi.Models;
+using DemoApi.Models.Posts;
 
 namespace DemoApi.Services
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DemoApi.Models
+namespace DemoApi.Models.Posts
 {
     public class PostResponse
     {

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DemoApi.Data.Repositories;
 using DemoApi.Models;
+using DemoApi.Models.Posts;
 
 namespace DemoApi.Services
 {
@@ -16,11 +18,11 @@ namespace DemoApi.Services
 
         public async Task<PostResponse> DeleteAsync(Guid id)
         {
-            var post = await Repo.GetByIdAsync(id);
+            Post post = await Repo.GetByIdAsync(id);
             if (post is null)
                 return new PostResponse($"Post with id: {id} wasn't found");
             Repo.Delete(post);
-            var result = await Repo.SaveAsync();
+            int result = await Repo.SaveAsync();
             return result == 0
                 ? new PostResponse("No changes were made")
                 : new PostResponse(post: post);
@@ -28,13 +30,13 @@ namespace DemoApi.Services
 
         public async Task<PostResponse> UpdateAsync(Guid id, string content)
         {
-            var post = await Repo.GetByIdAsync(id);
+            Post post = await Repo.GetByIdAsync(id);
             if (post is null)
                 return new PostResponse($"Post with id {id} wasn't found");
-            var beforeUpdate = post.Content;
+            string beforeUpdate = post.Content;
             post.Content = content;
             Repo.Update(post);
-            var result = await Repo.SaveAsync();
+            int result = await Repo.SaveAsync();
             return result == 0
                 ? new PostResponse("No changes were made")
                 : new PostResponse($"{beforeUpdate} was changed to: {post.Content}");
@@ -42,7 +44,7 @@ namespace DemoApi.Services
 
         public async Task<PostResponse> GetByIdAsync(Guid id)
         {
-            var post = await Repo.GetByIdAsync(id);
+            Post post = await Repo.GetByIdAsync(id);
             return post is null
                 ? new PostResponse($"Post with id: {id} wasn't found")
                 : new PostResponse(post: post);
@@ -56,7 +58,7 @@ namespace DemoApi.Services
                 UserId = userid
             };
             await Repo.AddAsync(post);
-            var result = await Repo.SaveAsync();
+            int result = await Repo.SaveAsync();
             return result == 0
                 ? new PostResponse("No changes were made")
                 : new PostResponse(post: post);
@@ -64,7 +66,7 @@ namespace DemoApi.Services
 
         public async Task<PostResponse> GetAllAsync()
         {
-            var postList = await Repo.GetAllAsync();
+            List<Post> postList = await Repo.GetAllAsync();
             return postList.Count == 0
                 ? new PostResponse("No content was found")
                 : new PostResponse(postList: postList);

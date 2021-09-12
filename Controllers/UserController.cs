@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using DemoApi.Routing.v1.DataTransferObjects;
+using DemoApi.Models.Auth;
 using DemoApi.Services;
-using DemoApi.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoApi.Controllers
@@ -18,21 +17,30 @@ namespace DemoApi.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserDto request)
+        public async Task<IActionResult> RegisterAsync([FromBody] AuthenticationRequest request)
         {
-            var response = await _identityService.RegisterAsync(request.Username, request.Password);
+            AuthenticationResult response = await _identityService.RegisterAsync(request.Username, request.Password);
             if (!response.Success)
-                return BadRequest(new RegistrationResponse { Errors = response.Errors });
-            return Ok(new RegistrationResponse { Token = response.Token });
+                return BadRequest(new AuthenticationResult { Errors = response.Errors });
+            return Ok(new AuthenticationResult { Token = response.Token, RefreshToken = response.RefreshToken });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto request)
+        public async Task<IActionResult> LoginAsync([FromBody] AuthenticationRequest request)
         {
-            var response = await _identityService.LoginAsync(request.Username, request.Password);
+            AuthenticationResult response = await _identityService.LoginAsync(request.Username, request.Password);
             if (!response.Success)
-                return BadRequest(new RegistrationResponse { Errors = response.Errors });
-            return Ok(new RegistrationResponse { Token = response.Token });
+                return BadRequest(new AuthenticationResult { Errors = response.Errors });
+            return Ok(new AuthenticationResult { Token = response.Token, RefreshToken = response.RefreshToken });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshRequest request)
+        {
+            AuthenticationResult response = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken);
+            if (!response.Success)
+                return BadRequest(new AuthenticationResult { Errors = response.Errors });
+            return Ok(new AuthenticationResult { Token = response.Token, RefreshToken = response.RefreshToken });
         }
     }
 }

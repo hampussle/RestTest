@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DemoApi.Models.Posts;
 using DemoApi.Services;
 using DemoApi.Services.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,7 +24,7 @@ namespace DemoApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            var response = await _postService.GetAllAsync();
+            PostResponse response = await _postService.GetAllAsync();
             return response.PostList is null
                 ? NotFound(response.Message)
                 : Ok(response.PostList);
@@ -32,7 +33,7 @@ namespace DemoApi.Controllers
         [HttpGet("{id:Guid}")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
         {
-            var response = await _postService.GetByIdAsync(id);
+            PostResponse response = await _postService.GetByIdAsync(id);
             return response.Post is null
                 ? NotFound(response.Message)
                 : Ok(response.Post);
@@ -41,7 +42,7 @@ namespace DemoApi.Controllers
         [HttpPost("{content}")]
         public async Task<IActionResult> AddAsync(string content)
         {
-            var response = await _postService.AddAsync(HttpContext.GetUserId(), content);
+            PostResponse response = await _postService.AddAsync(HttpContext.GetUserId(), content);
             return response.Post is null
                 ? NotFound(response.Message)
                 : Ok(response.Post);
@@ -50,10 +51,10 @@ namespace DemoApi.Controllers
         [HttpPut("{id, content}")]
         public async Task<IActionResult> UpdateAsync(Guid id, string content)
         {
-            var permission = await _postService.CorrectUserForPost(id, HttpContext.GetUserId());
+            bool permission = await _postService.CorrectUserForPost(id, HttpContext.GetUserId());
             if (!permission)
                 return BadRequest(new { error = "User does not own post" });
-            var response = await _postService.UpdateAsync(id, content);
+            PostResponse response = await _postService.UpdateAsync(id, content);
             return response.Post is null
                 ? NotFound(response.Message)
                 : Ok(response.Post);
@@ -62,7 +63,7 @@ namespace DemoApi.Controllers
         [HttpDelete("delete/{id:Guid}")]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            var response = await _postService.DeleteAsync(id);
+            PostResponse response = await _postService.DeleteAsync(id);
             return response.Post is null
                 ? NotFound(response.Message)
                 : Ok(response.Post);

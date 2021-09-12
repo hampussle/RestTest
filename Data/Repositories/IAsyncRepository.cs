@@ -11,7 +11,7 @@ namespace DemoApi.Data.Repositories
 
         Task<T> GetByIdAsync(Guid id);
 
-        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+        Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
 
         Task<List<T>> Where(Expression<Func<T, bool>> predicate);
 

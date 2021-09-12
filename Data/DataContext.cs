@@ -1,4 +1,5 @@
 ﻿using DemoApi.Models;
+using DemoApi.Models.Auth;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace DemoApi.Data
         {
         }
 
-        public DbSet<Post> Post { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<RefreshToken> Tokens { get; set; }
     }
 }
