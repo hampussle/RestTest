@@ -71,7 +71,7 @@ namespace DemoApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TodoAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "DemoAPI", Version = "v1" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -96,7 +96,10 @@ namespace DemoApi
                     }
                 });
             });
-            services.AddCors(options => options.AddPolicy(Origins, builder => builder.AllowAnyOrigin()));
+            services.AddCors(options => options.AddPolicy(Origins, builder =>
+                builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -105,7 +108,7 @@ namespace DemoApi
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage()
                     .UseSwagger()
-                    .UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TodoAPI v1"));
+                    .UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoAPI v1"));
 
             app.UseHttpsRedirection()
                 .UseCors(Origins)
